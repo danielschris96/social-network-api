@@ -1,7 +1,6 @@
 const express = require('express');
 const db = require('./config/connection');
-// Require model
-const { User, Thought, Reaction } = require('./models');
+const routes = require('./routes/api');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -9,10 +8,7 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Sample route
-app.get('/', (req, res) => {
-  res.send('Welcome to the Social Network API!');
-});
+app.use('/api', routes.apiRoutes);
 
 
 
