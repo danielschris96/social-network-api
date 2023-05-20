@@ -1,4 +1,5 @@
-const { Schema } = require('mongoose');
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 const moment = require('moment');
 
 const reactionSchema = new Schema({
