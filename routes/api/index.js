@@ -8,5 +8,6 @@ const router = require('express').Router();
 router.use('/thoughts', thoughtRoutes);
 router.use('/users', userRoutes);
 router.use('/reaction', reactionRoutes);
+router.use('/friend', friendRoutes);
 
 module.exports = router;
