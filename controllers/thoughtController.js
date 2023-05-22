@@ -1,4 +1,5 @@
 const { User, Thought, Reaction } = require('../models');
+const mongoose = require('mongoose');
 
 module.exports = {
     // Get all thoughts
@@ -88,12 +89,22 @@ module.exports = {
         .catch(err => res.json(err));
     },
     removeReaction(req, res) {
-        Thought.findOneAndUpdate(
-            { _id: req.params.thoughtId },
-            { $pull: { reactions: { reactionId: mongoose.Types.ObjectId(req.params.reactionId) } } },
-            { new: true }
-        )
-        .then(dbThoughtData => res.json(dbThoughtData))
-        .catch(err => res.json(err));
-    },
+      Thought.findOneAndUpdate(
+          { _id: req.params.thoughtId, "reactions._id": mongoose.Types.ObjectId(req.params.reactionId) },
+          { $pull: { reactions: { _id: mongoose.Types.ObjectId(req.params.reactionId) } } },
+          { new: true }
+      )
+      .then(dbThoughtData => {
+          if (!dbThoughtData) {
+              console.log("Failed to remove reaction. No thought found with this id.");
+              return res.status(404).json({ message: 'No thought found with this id!' });
+          }
+          console.log("Reaction removal was successful.");
+          return res.json(dbThoughtData);
+      })
+      .catch(err => {
+          console.log("Error occurred while removing reaction: ", err);
+          return res.status(500).json(err);
+      });
+  }
 }

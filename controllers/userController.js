@@ -49,33 +49,57 @@ module.exports = {
           .catch((err) => res.status(500).json(err));
     },
     addFriend(req, res) {
-        User.findByIdAndUpdate(
-            req.params.userId,
-            { $addToSet: { friends: req.params.friendId } },
-            { new: true, runValidators: true }
-        )
-        .then(dbUserData => {
-            if (!dbUserData) {
-                res.status(404).json({ message: 'No user found with this id!' });
-                return;
-            }
-            res.json(dbUserData);
-        })
-        .catch(err => res.status(500).json({ message: 'An error occurred', error: err }));
-    },
-    removeFriend(req, res) {
-        User.findByIdAndUpdate(
-            req.params.userId,
-            { $pull: { friends: req.params.friendId } },
-            { new: true }
-        )
-        .then(dbUserData => {
-            if (!dbUserData) {
-                res.status(404).json({ message: 'No user found with this id!' });
-                return;
-            }
-            res.json(dbUserData);
-        })
-        .catch(err => res.status(500).json({ message: 'An error occurred', error: err }));
-    },
+      const { userId, friendId } = req.params;
+      User.findByIdAndUpdate(
+          userId,
+          { $addToSet: { friends: friendId } },
+          { new: true, runValidators: true }
+      )
+      .then(dbUserData => {
+          if (!dbUserData) {
+              res.status(404).json({ message: 'No user found with this id!' });
+              return;
+          }
+          return User.findByIdAndUpdate(
+              friendId,
+              { $addToSet: { friends: userId } },
+              { new: true, runValidators: true }
+          );
+      })
+      .then(dbFriendData => {
+          if (!dbFriendData) {
+              res.status(404).json({ message: 'No friend found with this id!' });
+              return;
+          }
+          res.json({ message: 'Friend added successfully' });
+      })
+      .catch(err => res.status(500).json({ message: 'An error occurred', error: err }));
+  },
+  removeFriend(req, res) {
+      const { userId, friendId } = req.params;
+      User.findByIdAndUpdate(
+          userId,
+          { $pull: { friends: friendId } },
+          { new: true }
+      )
+      .then(dbUserData => {
+          if (!dbUserData) {
+              res.status(404).json({ message: 'No user found with this id!' });
+              return;
+          }
+          return User.findByIdAndUpdate(
+              friendId,
+              { $pull: { friends: userId } },
+              { new: true }
+          );
+      })
+      .then(dbFriendData => {
+          if (!dbFriendData) {
+              res.status(404).json({ message: 'No friend found with this id!' });
+              return;
+          }
+          res.json({ message: 'Friend removed successfully' });
+      })
+      .catch(err => res.status(500).json({ message: 'An error occurred', error: err }));
+  },
 }
