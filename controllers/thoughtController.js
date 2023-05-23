@@ -2,14 +2,17 @@ const { User, Thought, Reaction } = require('../models');
 const mongoose = require('mongoose');
 
 module.exports = {
-    // Get all thoughts
+    // get all thoughts
     getThoughts(req, res) {
+      // finds all thoughts in the thought collection
       Thought.find()
         .then((thoughts) => res.json(thoughts))
         .catch((err) => res.status(500).json(err));
     },
     getSingleThought(req, res) {
+      // find one thought by its _id
         Thought.findOne({ _id: req.params.thoughtId })
+        // excluding the __v field
           .select('-__v')
           .then((thought) =>
             !thought
@@ -19,10 +22,13 @@ module.exports = {
           .catch((err) => res.status(500).json(err));
     },
     createThought(req, res) {
+      // create a new thought
         Thought.create(req.body)
           .then((thought) => {
+            // then find the user that we want to add this thought to
             return User.findOneAndUpdate(
               { _id: req.body.userId },
+              // add the thought's _id to the user's thoughts array
               { $addToSet: { thoughts: thought._id } },
               { new: true }
             );
@@ -40,6 +46,7 @@ module.exports = {
           });
     },
     deleteThought(req, res) {
+      // delete the thought
         Thought.findByIdAndDelete(req.params.thoughtId)
           .then((deletedThought) => {
             if (!deletedThought) {
@@ -47,8 +54,10 @@ module.exports = {
             }
             // update the user document
             return User.findOneAndUpdate(
-              { thoughts: req.params.thoughtId }, // find user with this thought
-              { $pull: { thoughts: req.params.thoughtId } }, // remove thought from user's thoughts array
+              // remove the comment from the user's `thoughts` array
+              { thoughts: req.params.thoughtId }, 
+              // pull the comment's _id from the user's `thoughts` array
+              { $pull: { thoughts: req.params.thoughtId } }, 
               { new: true }
             );
           })
@@ -90,7 +99,9 @@ module.exports = {
     },
     removeReaction(req, res) {
       Thought.findOneAndUpdate(
+        // find the thought by its id
           { _id: req.params.thoughtId, "reactions._id": mongoose.Types.ObjectId(req.params.reactionId) },
+          // remove the reaction
           { $pull: { reactions: { _id: mongoose.Types.ObjectId(req.params.reactionId) } } },
           { new: true }
       )

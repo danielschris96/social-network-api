@@ -15,9 +15,11 @@ const reactionSchema = new Schema({
   createdAt: {
     type: Date,
     default: Date.now,
+    // use moment to format the timestamp on query
     get: (createdAtVal) => moment(createdAtVal).format('MMM DD, YYYY [at] hh:mm a')
   },
 },
+// use toJSON to tell the schema to use virtuals
 {
   toJSON: {
     getters: true
